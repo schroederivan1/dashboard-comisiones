@@ -174,6 +174,7 @@
   </div>
   <div class="header-right">
     <button class="btn-refresh" onclick="loadData()">🔄 Actualizar</button>
+    <button class="btn-refresh" onclick="showUpdateModal()" style="background:rgba(245,158,11,0.3);color:#fcd34d">📋 Pegar CSV</button>
     <div class="tabs">
       <button class="tab active" id="tab-resumen" onclick="setView('resumen')">📊 Resumen</button>
       <button class="tab" id="tab-detalle" onclick="setView('detalle')">📋 Detalle</button>
@@ -263,14 +264,11 @@
 </div>
 
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwXEr6VGaHFYw3sEo3YKw05AoTL2-OA83PQBdiCGLOME3sWfx3P6r5WEeMsZf11Rt7F/exec";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQisrls0jPnJw6osZhlhvTwqPNIfts3PMXCTfF4eEJhwWxHxhkXy25j7NaRkq1HTwlDyec5Dqep2yi1/pub?gid=623437309&single=true&output=csv";
 
-const PROXIES = [
-  url => url, // Apps Script tiene CORS habilitado
-  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-
-];
+// ── DATOS INCRUSTADOS (actualizados desde el CSV) ──────────────────────────
+const CSV_EMBED = "SEGUIMIENTO DE COMISIONES \u2013 MARZO 2026,,,,,,,,,\n  Ingres\u00e1 los m\u00b2 vendidos en la columna E (fondo amarillo). El resto se calcula solo.,,,,,,,,,\nProducto,Obj A (m\u00b2),Obj B (m\u00b2),Obj C (m\u00b2),\"M\u00b2 VENDIDOS\n(ingres\u00e1 aqu\u00ed)\",Com. Base $/m\u00b2,\"Com. en tramo A\n$/m\u00b2\",\"Com. en tramo B\n$/m\u00b2\",\"Com. en tramo C\n$/m\u00b2\",TRAMO ACTUAL\n  CA\u00d1UELAS,,,,,,,,,\n32x47,6.290,6.290,6.290,0,\"$12,08\",\"$15,09\",\"$15,09\",\"$15,09\",\u2013 Sin ventas\n43x43,6.290,6.290,6.290,0,\"$12,08\",\"$15,09\",\"$15,09\",\"$15,09\",\u2013 Sin ventas\n50x50,11.830,11.830,11.830,0,\"$13,50\",\"$16,88\",\"$16,88\",\"$16,88\",\u2013 Sin ventas\n  SELECTA,,,,,,,,,\n20x62,2.560,3.200,4.340,0,\"$24,23\",\"$30,28\",\"$36,34\",\"$42,39\",\u2013 Sin ventas\n61x61,910,1.180,1.650,0,\"$29,07\",\"$36,34\",\"$43,61\",\"$50,87\",\u2013 Sin ventas\n61x61P,2.740,4.110,5.980,0,\"$32,85\",\"$41,06\",\"$49,28\",\"$57,49\",\u2013 Sin ventas\n20x123,480,1.020,1.660,438,\"$29,07\",\"$36,34\",\"$43,61\",\"$50,87\",\u2717 Bajo objetivo A\n61x123,2.290,2.630,3.370,0,\"$29,07\",\"$36,34\",\"$43,61\",\"$50,87\",\u2013 Sin ventas\n61x123P,1.630,1.980,2.630,0,\"$32,85\",\"$41,06\",\"$49,28\",\"$57,49\",\u2013 Sin ventas\n  TENDENZA,,,,,,,,,\n30x62,2.100,2.290,2.880,0,\"$32,85\",\"$41,06\",\"$49,28\",\"$57,49\",\u2013 Sin ventas\n19x118,2.810,2.980,3.650,566.666,\"$32,85\",\"$41,06\",\"$49,28\",\"$57,49\",\u2714 TRAMO C (maximo)\n57x57,1.620,2.290,3.260,0,\"$32,85\",\"$41,06\",\"$49,28\",\"$57,49\",\u2013 Sin ventas\n57x57P,550,610,770,0,\"$44,97\",\"$56,21\",\"$67,46\",\"$78,70\",\u2013 Sin ventas\n57x117,3.380,3.790,4.800,0,\"$32,85\",\"$41,06\",\"$49,28\",\"$57,49\",\u2013 Sin ventas\n57x117P,2.600,2.870,3.640,0,\"$44,97\",\"$56,21\",\"$67,46\",\"$78,70\",\u2013 Sin ventas\n91x91,870,1.050,1.430,0,\"$32,85\",\"$41,06\",\"$49,28\",\"$57,49\",\u2013 Sin ventas\n91x91P,3.980,4.190,5.100,0,\"$44,97\",\"$56,21\",\"$67,46\",\"$78,70\",\u2013 Sin ventas\nSubtotal CA\u00d1UELAS,,,,0,,,,,\nSubtotal SELECTA,,,,438,,,,,\nSubtotal TENDENZA,,,,566.666,,,,,\nTOTAL GENERAL m\u00b2,,,,567.104,,,,,\n,,,,,,,,,\nCOMISI\u00d3N ESTIMADA POR PRODUCTO,,,,,,,,,\nProducto,M\u00b2 vendidos,Tramo actual,$/m\u00b2 aplicado,Comisi\u00f3n ($),Falta para subir tramo,M\u00b2 que faltan,% del objetivo,,Recomendaci\u00f3n\n  CA\u00d1UELAS,,,,,,,,,\n32x47,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,6.290,\"0,0%\",,Faltan 6.290 m\u00b2 Falta para A\n43x43,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,6.290,\"0,0%\",,Faltan 6.290 m\u00b2 Falta para A\n50x50,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,11.830,\"0,0%\",,Faltan 11.830 m\u00b2 Falta para A\n  SELECTA,,,,,,,,,\n20x62,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,2.560,\"0,0%\",,Faltan 2.560 m\u00b2 Falta para A\n61x61,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,910,\"0,0%\",,Cerca! Faltan 910 m\u00b2 Falta para A\n61x61P,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,2.740,\"0,0%\",,Faltan 2.740 m\u00b2 Falta para A\n20x123,438,\u2717 Bajo objetivo A,\"$29,07\",$12.733,Falta para A,42,\"91,3%\",,\u00a1URGENTE! Solo faltan 42 m\u00b2 Falta para A\n61x123,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,2.290,\"0,0%\",,Faltan 2.290 m\u00b2 Falta para A\n61x123P,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,1.630,\"0,0%\",,Faltan 1.630 m\u00b2 Falta para A\n  TENDENZA,,,,,,,,,\n30x62,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,2.100,\"0,0%\",,Faltan 2.100 m\u00b2 Falta para A\n19x118,566.666,\u2714 TRAMO C (maximo),\"$57,49\",$32.577.628,Maximo alcanzado,0,\"100,0%\",,\u2714 Maximo - seguir vendiendo!\n57x57,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,1.620,\"0,0%\",,Faltan 1.620 m\u00b2 Falta para A\n57x57P,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,550,\"0,0%\",,Cerca! Faltan 550 m\u00b2 Falta para A\n57x117,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,3.380,\"0,0%\",,Faltan 3.380 m\u00b2 Falta para A\n57x117P,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,2.600,\"0,0%\",,Faltan 2.600 m\u00b2 Falta para A\n91x91,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,870,\"0,0%\",,Cerca! Faltan 870 m\u00b2 Falta para A\n91x91P,0,\u2013 Sin ventas,\"$0,00\",$0,Falta para A,3.980,\"0,0%\",,Faltan 3.980 m\u00b2 Falta para A\nSubtotal CA\u00d1UELAS,,,,$0,,,,,\nSubtotal SELECTA,,,,$12.733,,,,,\nSubtotal TENDENZA,,,,$32.577.628,,,,,\nCOMISI\u00d3N TOTAL ESTIMADA,,,,$32.590.361,,,,,";
+// ──────────────────────────────────────────────────────────────────────────
 
 const lineaColors = {
   CAÑUELAS: { color: "#2196F3", bg: "#1a3a5c" },
@@ -298,14 +296,27 @@ let allData = {}; // { CAÑUELAS: [...], SELECTA: [...], TENDENZA: [...] }
 let selectedLinea = null;
 let currentView = "resumen";
 
-function parseCSV(text) {
-  const lines = text.split("\n").map(l => l.split(",").map(c => c.trim().replace(/^"|"$/g,"")));
-  return lines;
-}
-
 function cleanNum(val) {
   if(!val) return 0;
-  const n = parseFloat(String(val).replace(/[$,\s]/g,""));
+  let s = String(val).replace(/[$\s]/g, "");
+  // Formato argentino: punto = miles, coma = decimales  (ej: "1.460.310" o "$12,08")
+  // Si hay punto Y coma → punto es miles, coma es decimal
+  if(s.includes(".") && s.includes(",")) {
+    s = s.replace(/\./g, "").replace(",", ".");
+  }
+  // Si solo hay punto y más de un dígito después → es separador de miles (ej: "6.290", "172.098")
+  else if(s.includes(".")) {
+    const parts = s.split(".");
+    if(parts[parts.length - 1].length === 3) {
+      s = s.replace(/\./g, ""); // quitar puntos de miles
+    }
+    // si tiene 1 o 2 decimales, dejarlo como decimal normal
+  }
+  // Si solo hay coma → es decimal argentino (ej: "12,08")
+  else if(s.includes(",")) {
+    s = s.replace(",", ".");
+  }
+  const n = parseFloat(s);
   return isNaN(n) ? 0 : n;
 }
 
@@ -349,140 +360,156 @@ async function loadData() {
   document.getElementById("loading").style.display = "flex";
   document.getElementById("loading").innerHTML = `
     <div class="spinner"></div>
-    <div class="loading-text">Cargando datos desde Google Sheets...</div>`;
+    <div class="loading-text">Cargando datos...</div>`;
   document.getElementById("main").style.display = "none";
 
-  let lastError = null;
-  for(const proxyFn of PROXIES) {
-    try {
-      const url = proxyFn(SHEET_URL);
-      const res = await fetch(url, { cache: "no-cache" });
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  // Intentar cargar desde la red primero
+  try {
+    const res = await Promise.race([
+      fetch(SHEET_URL, { cache: "no-cache" }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000))
+    ]);
+    if(res.ok) {
       const text = await res.text();
-      if(!text || text.length < 10) throw new Error("Respuesta vacía");
-      if(text.trim().startsWith("<")) throw new Error("Respuesta no es CSV");
-      processCSV(text);
-      return;
-    } catch(e) {
-      lastError = e;
-      continue;
+      if(text && text.length > 10 && !text.trim().startsWith("<")) {
+        processCSV(text);
+        return;
+      }
     }
-  }
+  } catch(e) { /* silencioso, usamos datos incrustados */ }
 
-  document.getElementById("loading").innerHTML = `
-    <div class="error-box">
-      <strong>⚠️ No se pudo conectar a Google Sheets</strong><br><br>
-      Verificá que:<br>
-      1. La planilla esté publicada (<b>Archivo → Compartir → Publicar en la web</b>)<br>
-      2. Tengas conexión a internet<br>
-      3. El navegador no esté bloqueando solicitudes externas<br><br>
-      <small style="color:#94a3b8">Error: ${lastError?.message}</small><br><br>
-      <button onclick="loadData()" style="margin-top:10px;padding:8px 16px;background:#2196F3;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700">🔄 Reintentar</button>
+  // Fallback: usar datos incrustados
+  processCSV(CSV_EMBED);
+}
+
+function showUpdateModal() {
+  const modal = document.createElement("div");
+  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center";
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:14px;padding:28px;width:560px;max-width:95vw">
+      <h3 style="margin-bottom:8px;font-size:15px">📋 Actualizar datos desde Google Sheets</h3>
+      <p style="color:#64748b;font-size:12px;margin-bottom:14px">
+        1. Abrí el <a href="${SHEET_URL}" target="_blank" style="color:#2196F3">link del CSV</a> en tu navegador<br>
+        2. Seleccioná todo (Ctrl+A) y copiá (Ctrl+C)<br>
+        3. Pegá el contenido acá abajo y hacé clic en Actualizar
+      </p>
+      <textarea id="csv-paste" placeholder="Pegá el CSV acá..." style="width:100%;height:160px;border:1px solid #e2e8f0;border-radius:8px;padding:10px;font-size:11px;font-family:monospace;resize:vertical"></textarea>
+      <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+        <button onclick="this.closest('div[style]').remove()" style="padding:8px 18px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-weight:600">Cancelar</button>
+        <button onclick="applyPastedCSV()" style="padding:8px 18px;border-radius:6px;border:none;background:#2196F3;color:#fff;cursor:pointer;font-weight:600">✅ Actualizar dashboard</button>
+      </div>
     </div>`;
+  document.body.appendChild(modal);
+}
+
+function applyPastedCSV() {
+  const text = document.getElementById("csv-paste")?.value?.trim();
+  if(!text || text.length < 20) { alert("El texto pegado parece vacío. Intentá de nuevo."); return; }
+  document.querySelector("div[style*='position:fixed']")?.remove();
+  processCSV(text);
+}
+
+function parseCSVLine(line) {
+  // Parser que respeta comillas con comas adentro
+  const result = [];
+  let cur = "", inQ = false;
+  for(let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if(ch === '"') { inQ = !inQ; continue; }
+    if(ch === ',' && !inQ) { result.push(cur.trim()); cur = ""; continue; }
+    cur += ch;
+  }
+  result.push(cur.trim());
+  return result;
 }
 
 function processCSV(text) {
-  const rows = parseCSV(text);
+  const lines = text.split(/\r?\n/);
+  const rows = lines.map(l => parseCSVLine(l));
+
   allData = { CAÑUELAS: [], SELECTA: [], TENDENZA: [] };
 
-  // ── SECCIÓN 1: leer objetivos y m² vendidos (filas 3-22 aprox)
-  // Estructura fija: col0=Producto, col1=ObjA, col2=ObjB, col3=ObjC,
-  //                  col4=M²Vendidos, col5=ComBase, col9=Tramo
-  const seccion1 = {}; // { producto: { objA, objB, objC, m2, rate, tramo } }
-  let currentLinea = null;
-  let enSeccion1 = false;
+  // ── SECCIÓN 1: filas con Producto / ObjA / ObjB / ObjC / M²Vendidos / ComBase ... / TRAMO
+  // Header detectado cuando col0="Producto" y col1 contiene "obj"
+  const sec1 = {};
+  let linea1 = null, inSec1 = false;
 
   for(let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    const col0 = (row[0] || "").trim().replace(/^\s+/,"");
+    const r = rows[i];
+    const c0 = (r[0]||"").trim();
+    const c0n = norm(c0);
 
-    // Detectar inicio sección 1
-    if(col0 === "Producto" && (row[1]||"").toLowerCase().includes("obj")) {
-      enSeccion1 = true; continue;
-    }
-    // Detectar inicio sección 2 (termina sección 1)
-    if(col0 === "Producto" && (row[1]||"").toLowerCase().includes("vendido")) {
-      enSeccion1 = false; continue;
-    }
-    if(!enSeccion1) continue;
+    if(c0 === "Producto" && norm(r[1]||"").includes("OBJ")) { inSec1 = true; continue; }
+    if(c0 === "Producto" && norm(r[1]||"").includes("VENDIDO")) { inSec1 = false; continue; }
+    if(!inSec1) continue;
 
-    // Detectar línea (normalizar para manejar tildes y espacios)
-    const col0Norm = norm(col0);
-    if(LINEAS.map(l=>norm(l)).includes(col0Norm)) { currentLinea = LINEAS.find(l=>norm(l)===col0Norm); continue; }
+    if(LINEAS.map(l=>norm(l)).includes(c0n)) { linea1 = LINEAS.find(l=>norm(l)===c0n); continue; }
+    if(!linea1 || !c0) continue;
+    if(IGNORAR.some(w => c0.toLowerCase().includes(w))) continue;
 
-    // Ignorar subtotales/totales/encabezados
-    if(IGNORAR.some(w => col0.toLowerCase().includes(w))) continue;
-    if(col0.toLowerCase() === "producto") continue;
-    if(!currentLinea || !col0) continue;
-
-    seccion1[col0] = {
-      linea: currentLinea,
-      objA:  cleanNum(row[1]),
-      objB:  cleanNum(row[2]),
-      objC:  cleanNum(row[3]),
-      m2:    cleanNum(row[4]),
-      rate:  cleanNum(row[5]),
-      tramo: detectTramo(row[9] || ""),
+    // col0=Producto, col1=ObjA, col2=ObjB, col3=ObjC, col4=M²Vendidos, col5=ComBase, col9=Tramo
+    sec1[c0] = {
+      linea: linea1,
+      objA:  cleanNum(r[1]),
+      objB:  cleanNum(r[2]),
+      objC:  cleanNum(r[3]),
+      m2:    cleanNum(r[4]),
+      rate:  cleanNum(r[5]),
+      tramo: detectTramo(r[9] || ""),
     };
   }
 
-  // ── SECCIÓN 2: leer comisión calculada, % objetivo y recomendación
-  // Estructura: col0=Producto, col1=M²vendidos, col2=Tramo, col3=$/m²,
-  //             col4=Comisión($), col7=%objetivo, col9=Recomendación
-  currentLinea = null;
-  let enSeccion2 = false;
+  // ── SECCIÓN 2: tabla de comisiones estimadas
+  // Header: col0=Producto, col1=M²vendidos, col2=Tramo, col3=$/m², col4=Comisión($), col7=%objetivo, col9=Recomendación
+  let linea2 = null, inSec2 = false;
 
   for(let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    const col0 = (row[0] || "").trim().replace(/^\s+/,"");
+    const r = rows[i];
+    const c0 = (r[0]||"").trim();
+    const c0n = norm(c0);
 
-    if(col0 === "Producto" && (row[1]||"").toLowerCase().includes("vendido")) {
-      enSeccion2 = true; continue;
-    }
-    if(!enSeccion2) continue;
+    if(c0 === "Producto" && norm(r[1]||"").includes("VENDIDO")) { inSec2 = true; continue; }
+    if(!inSec2) continue;
 
-    const col0Norm2 = norm(col0);
-    if(LINEAS.map(l=>norm(l)).includes(col0Norm2)) { currentLinea = LINEAS.find(l=>norm(l)===col0Norm2); continue; }
-    if(IGNORAR.some(w => col0.toLowerCase().includes(w))) continue;
-    if(col0.toLowerCase() === "producto") continue;
-    if(!currentLinea || !col0) continue;
+    if(LINEAS.map(l=>norm(l)).includes(c0n)) { linea2 = LINEAS.find(l=>norm(l)===c0n); continue; }
+    if(!linea2 || !c0) continue;
+    if(IGNORAR.some(w => c0.toLowerCase().includes(w))) continue;
+    if(c0n === "PRODUCTO") continue;
 
-    // Buscar el producto con match flexible (ignorar espacios y mayúsculas)
-    const keyMatch = Object.keys(seccion1).find(k => 
-      k.trim().toLowerCase() === col0.trim().toLowerCase()
-    );
-    if(keyMatch) {
-      seccion1[keyMatch].comision = cleanNum(row[4]);
-      const pctRaw = parseFloat((row[7] || "0").toString().replace(/[%\s]/g, "")) || 0;
-      seccion1[keyMatch].pct = pctRaw <= 1 ? pctRaw * 100 : pctRaw;
-      // Tramo: usar el de sección 1 (col9 del Excel) que es más confiable
-      // Solo sobreescribir si sección 1 no lo detectó bien
-      const tramoSec2 = detectTramo(row[2] || "");
-      if(seccion1[keyMatch].tramo === "sin_ventas" && tramoSec2 !== "sin_ventas") {
-        seccion1[keyMatch].tramo = tramoSec2;
-      }
-      seccion1[keyMatch].rec = (row[9] || "").trim();
-    }
+    const key = Object.keys(sec1).find(k => k.trim().toLowerCase() === c0.trim().toLowerCase());
+    if(!key) continue;
+
+    sec1[key].comision = cleanNum(r[4]);
+
+    // % objetivo: col7, puede venir como "42,1%" o "0,421"
+    const pctStr = (r[7] || "0").toString().replace(/\s/g,"").replace(",",".");
+    const pctRaw = parseFloat(pctStr.replace("%","")) || 0;
+    sec1[key].pct = pctStr.includes("%") ? pctRaw : pctRaw * 100;
+
+    // Tramo de sección 2 como respaldo
+    const t2 = detectTramo(r[2] || "");
+    if(sec1[key].tramo === "sin_ventas" && t2 !== "sin_ventas") sec1[key].tramo = t2;
+
+    sec1[key].rec = (r[9] || "").trim();
   }
 
   // ── Armar allData
-  Object.entries(seccion1).forEach(([producto, d]) => {
+  Object.entries(sec1).forEach(([producto, d]) => {
     if(!allData[d.linea]) return;
-    const pct = d.pct || calcPct(d.m2, d.objA);
+    const pct = d.pct != null ? d.pct : calcPct(d.m2, d.objA);
     const rec = d.rec || (
-      d.tramo === "c" ? "✔ Máximo - seguir vendiendo!" :
-      d.m2 === 0      ? `Faltan ${d.objA.toLocaleString()} m² para subir` :
-      pct >= 85       ? `¡URGENTE! Muy cerca de subir tramo` :
-                        `Faltan ${Math.round(d.objA - d.m2).toLocaleString()} m² para subir`
+      d.tramo === "c"  ? "✔ Máximo - seguir vendiendo!" :
+      d.m2 === 0       ? `Faltan ${d.objA.toLocaleString()} m² para subir` :
+      pct >= 85        ? `¡URGENTE! Muy cerca de subir tramo` :
+                         `Faltan ${Math.round(d.objA - d.m2).toLocaleString()} m² para subir`
     );
     allData[d.linea].push({
       p: producto, m2: d.m2, objA: d.objA, objB: d.objB, objC: d.objC,
-      rate: d.rate, tramo: d.tramo, pct, comision: d.comision || d.m2 * d.rate, rec,
-      linea: d.linea
+      rate: d.rate, tramo: d.tramo, pct,
+      comision: d.comision != null ? d.comision : d.m2 * d.rate,
+      rec, linea: d.linea
     });
   });
-
-
 
   renderDashboard();
 }
