@@ -344,7 +344,11 @@ function calcPct(m2, objA) {
 function fmt(n) {
   return "$" + Math.round(n).toLocaleString("es-AR");
 }
-
+function fmtRate(n) {
+  if(!n || n === 0) return "0,00";
+  return n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+ 
 function pbarHTML(pct, tramo) {
   const color = tramoConfig[tramo]?.color || "#64748b";
   return `<div class="pbar-track"><div class="pbar-fill" style="width:${Math.min(pct,100)}%;background:${color}"></div></div>
@@ -478,6 +482,10 @@ function processCSV(text) {
 
     const key = Object.keys(sec1).find(k => k.trim().toLowerCase() === c0.trim().toLowerCase());
     if(!key) continue;
+   
+   // ✅ FIX: leer $/m² vigente desde col3 de sección 2 y sobreescribir la base
+    const rateVigente = cleanNum(r[3]);
+    if(rateVigente > 0) sec1[key].rate = rateVigente;
 
     sec1[key].comision = cleanNum(r[4]);
 
@@ -597,7 +605,7 @@ function renderInlineDetail(linea) {
       <td style="color:#64748b">${p.objB.toLocaleString()}</td>
       <td style="color:#64748b">${p.objC.toLocaleString()}</td>
       <td style="min-width:90px">${pbarHTML(p.pct, p.tramo)}</td>
-      <td style="font-family:monospace">$${p.rate}</td>
+      <td style="font-family:monospace">$${fmtRate(p.rate)}</td>
       <td style="font-weight:700;color:${p.comision>0?'#16a34a':'#94a3b8'}">${fmt(p.comision)}</td>
       <td>${tramoTagHTML(p.tramo)}</td>
       <td style="font-size:11px;${recClass}">${p.rec}</td>
@@ -672,7 +680,7 @@ function renderDetalle() {
         <td style="color:#64748b">${p.objB.toLocaleString()}</td>
         <td style="color:#64748b">${p.objC.toLocaleString()}</td>
         <td style="min-width:90px">${pbarHTML(p.pct, p.tramo)}</td>
-        <td style="font-family:monospace">$${p.rate}</td>
+        <td style="font-family:monospace">$${fmtRate(p.rate)}</td>
         <td style="font-weight:700;color:${p.comision>0?'#16a34a':'#94a3b8'}">${fmt(p.comision)}</td>
         <td>${tramoTagHTML(p.tramo)}</td>
         <td style="font-size:11px;${recClass}">${p.rec}</td>
